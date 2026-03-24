@@ -2,7 +2,7 @@ export default function App() {
   return (
     <div className="size-full flex items-center justify-center bg-white p-4 overflow-auto">
       <svg
-        viewBox="0 0 1100 920"
+        viewBox="0 0 1100 500"
         width="100%"
         style={{ maxWidth: 1100, fontFamily: "Inter, system-ui, sans-serif" }}
       >
@@ -13,15 +13,9 @@ export default function App() {
           Two-stage meta-control model of responding in AX-CPT
         </text>
 
-
-        {/* Panel A */}
+        {/* Single panel only */}
         <g transform="translate(0, 60)">
           <PanelA />
-        </g>
-
-        {/* Panel B */}
-        <g transform="translate(0, 460)">
-          <PanelB />
         </g>
 
         {/* Legend */}
@@ -44,8 +38,6 @@ const C = {
   grayB: "#C8C8C8",
   tBg: "#F5F5F5",
   tBorder: "#D0D0D0",
-  modBg: "#FAFAFA",
-  modB: "#B0B0B0",
   text: "#2A2A2A",
   muted: "#777777",
 };
@@ -69,16 +61,37 @@ function Defs() {
       {mk("a-blue", C.blue)}
       {mk("a-ora", C.orange)}
       {mk("a-gray", C.gray)}
-      {mk("a-mod", C.modB)}
     </defs>
   );
 }
 
 // ── Primitives ──
-function Box({ cx, cy, w, h, fill, stroke, label, sub, labelColor = C.text, fs = 12 }) {
+function Box({
+  cx,
+  cy,
+  w,
+  h,
+  fill,
+  stroke,
+  label,
+  sub,
+  labelColor = C.text,
+  fs = 12,
+  dashed = false,
+}) {
   return (
     <g>
-      <rect x={cx - w / 2} y={cy - h / 2} width={w} height={h} rx={7} fill={fill} stroke={stroke} strokeWidth={1.2} />
+      <rect
+        x={cx - w / 2}
+        y={cy - h / 2}
+        width={w}
+        height={h}
+        rx={7}
+        fill={fill}
+        stroke={stroke}
+        strokeWidth={1.2}
+        strokeDasharray={dashed ? "5,3" : "none"}
+      />
       <text
         x={cx}
         y={sub ? cy - 7 : cy + 1}
@@ -90,7 +103,15 @@ function Box({ cx, cy, w, h, fill, stroke, label, sub, labelColor = C.text, fs =
         {label}
       </text>
       {sub && (
-        <text x={cx} y={cy + 10} textAnchor="middle" dominantBaseline="middle" fill={C.muted} fontSize={12} fontStyle="italic">
+        <text
+          x={cx}
+          y={cy + 10}
+          textAnchor="middle"
+          dominantBaseline="middle"
+          fill={C.muted}
+          fontSize={12}
+          fontStyle="italic"
+        >
           {sub}
         </text>
       )}
@@ -98,27 +119,20 @@ function Box({ cx, cy, w, h, fill, stroke, label, sub, labelColor = C.text, fs =
   );
 }
 
-function DecisionBox({ cx, cy, w, h, fill, stroke, label, sub1, sub2 }) {
+function DiamondDecision({ cx, cy, w, h, fill, stroke, label, sub1, sub2 }) {
+  const top = `${cx},${cy - h / 2}`;
+  const right = `${cx + w / 2},${cy}`;
+  const bottom = `${cx},${cy + h / 2}`;
+  const left = `${cx - w / 2},${cy}`;
+  const points = `${top} ${right} ${bottom} ${left}`;
+
   return (
     <g>
-      <rect
-        x={cx - w / 2}
-        y={cy - h / 2}
-        width={w}
-        height={h}
-        rx={8}
-        fill={fill}
-        stroke={stroke}
-        strokeWidth={1.4}
-        strokeDasharray="5,3"
-      />
-      <text x={cx} y={cy - 10} textAnchor="middle" dominantBaseline="middle" fill={C.text} fontSize={14}>
+      <polygon points={points} fill={fill} stroke={stroke} strokeWidth={1.4} />
+      <text x={cx} y={cy - 6} textAnchor="middle" dominantBaseline="middle" fill={C.text} fontSize={14}>
         {label}
       </text>
       <text x={cx} y={cy + 8} textAnchor="middle" dominantBaseline="middle" fill={C.muted} fontSize={12} fontStyle="italic">
-        {sub1}
-      </text>
-      <text x={cx} y={cy + 22} textAnchor="middle" dominantBaseline="middle" fill={C.muted} fontSize={12} fontStyle="italic">
         {sub2}
       </text>
     </g>
@@ -133,21 +147,14 @@ function PathArr({ d, m, w = 1.2 }) {
   return <path d={d} fill="none" stroke={markerColor(m)} strokeWidth={w} markerEnd={`url(#${m})`} />;
 }
 
-// Clean orthogonal right-angle routing
-function OrthogonalArr({ x1, y1, x2, y2, yMid, m, w = 1.2 }) {
-  const d = `M${x1},${y1} V${yMid} H${x2} V${y2}`;
-  return <path d={d} fill="none" stroke={markerColor(m)} strokeWidth={w} markerEnd={`url(#${m})`} />;
-}
-
 function markerColor(m) {
   if (m.includes("blue")) return C.blue;
   if (m.includes("ora")) return C.orange;
   if (m.includes("gray")) return C.gray;
-  if (m.includes("mod")) return C.modB;
   return C.text;
 }
 
-// ── Y coordinates within each panel ──
+// ── Y coordinates within panel ──
 const TL_Y = 40; // timeline row
 const D_Y = 130; // decision row
 const S_Y = 220; // state row
@@ -155,31 +162,31 @@ const O_Y = 310; // output row
 const BH = 34; // box height
 const BW = 140; // standard box width
 const DW = 170; // decision box width
-const DH = 66; // decision box height
+const DH = 80; // decision box height
 
-// State positions (Cleanly spaced)
+// State positions
 const INT_X = X1;
 const NOINT_X = 340;
 const REC_X = X3;
 const NOREC_X = X4;
 
-// Output positions aligned vertically with specified state boxes
+// Output positions aligned vertically
 const PREP_X = INT_X;
 const RULE_X = REC_X;
 const HABIT_X = NOREC_X;
 
 // ── Model logic ──
-function ModelLogic({ yOff = 0 }) {
-  const dy = D_Y + yOff;
-  const sy = S_Y + yOff;
-  const oy = O_Y + yOff;
+function ModelLogic() {
+  const dy = D_Y;
+  const sy = S_Y;
+  const oy = O_Y;
 
   const mergeY = sy + 45;
 
   return (
     <g>
-      {/* Decision boxes */}
-      <DecisionBox
+      {/* Decision diamonds */}
+      <DiamondDecision
         cx={X1}
         cy={dy}
         w={DW}
@@ -190,7 +197,7 @@ function ModelLogic({ yOff = 0 }) {
         sub1="proactive control"
         sub2="P(intention setting)"
       />
-      <DecisionBox
+      <DiamondDecision
         cx={X3}
         cy={dy}
         w={DW}
@@ -202,30 +209,78 @@ function ModelLogic({ yOff = 0 }) {
         sub2="P(reactive recall)"
       />
 
-      {/* State boxes */}
-      <Box cx={INT_X} cy={sy} w={BW} h={BH} fill={C.blueBg} stroke={C.blueB} label="Intention set" labelColor={C.blue} fs={14} />
-      <Box cx={NOINT_X} cy={sy} w={BW} h={BH} fill={C.grayBg} stroke={C.grayB} label="No intention set" labelColor={C.gray} fs={14} />
-      <Box cx={REC_X} cy={sy} w={BW} h={BH} fill={C.orangeBg} stroke={C.orangeB} label="Recall succeeds" labelColor={C.orange} fs={14} />
-      <Box cx={NOREC_X} cy={sy} w={BW} h={BH} fill={C.grayBg} stroke={C.grayB} label="No recall" labelColor={C.gray} fs={14} />
+      {/* State boxes: dashed contours */}
+      <Box
+        cx={INT_X}
+        cy={sy}
+        w={BW}
+        h={BH}
+        fill={C.blueBg}
+        stroke={C.blueB}
+        label="Intention set"
+        labelColor={C.blue}
+        fs={14}
+        dashed
+      />
+      <Box
+        cx={NOINT_X}
+        cy={sy}
+        w={BW}
+        h={BH}
+        fill={C.grayBg}
+        stroke={C.grayB}
+        label="No intention set"
+        labelColor={C.gray}
+        fs={14}
+        dashed
+      />
+      <Box
+        cx={REC_X}
+        cy={sy}
+        w={BW}
+        h={BH}
+        fill={C.orangeBg}
+        stroke={C.orangeB}
+        label="Recall succeeds"
+        labelColor={C.orange}
+        fs={14}
+        dashed
+      />
+      <Box
+        cx={NOREC_X}
+        cy={sy}
+        w={BW}
+        h={BH}
+        fill={C.grayBg}
+        stroke={C.grayB}
+        label="No recall"
+        labelColor={C.gray}
+        fs={14}
+        dashed
+      />
 
-      {/* Decision -> State arrows (Orthogonal) */}
-      <PathArr d={`M${X1},${dy + DH / 2} V${sy - BH / 2 - 2}`} m="a-blue" />
-      <text x={X1 - 25} y={dy + DH / 2 + 20} fontSize={12} fill={C.blue}>
+      {/* Decision -> State arrows from bottom / side vertices */}
+      {/* Set intention? -> Intention set (yes) from bottom vertex */}
+      <Arr x1={X1} y1={dy + DH / 2} x2={INT_X} y2={sy - BH / 2 - 2} m="a-blue" />
+      <text x={X1 - 24} y={dy + DH / 2 + 20} fontSize={12} fill={C.blue}>
         yes
       </text>
 
-      <OrthogonalArr x1={X1 + 10} y1={dy + DH / 2} x2={NOINT_X} y2={sy - BH / 2 - 2} yMid={dy + DH / 2 + 20} m="a-gray" />
-      <text x={(X1 + NOINT_X) / 2} y={dy + DH / 2 + 15} textAnchor="middle" fontSize={12} fill={C.gray}>
+      {/* Set intention? -> No intention set (no) from right vertex */}
+      <PathArr d={`M${X1 + DW / 2},${dy} H${NOINT_X} V${sy - BH / 2 - 2}`} m="a-gray" />
+      <text x={(X1 + DW / 2 + NOINT_X) / 2} y={dy - 8} textAnchor="middle" fontSize={12} fill={C.gray}>
         no
       </text>
 
-      <PathArr d={`M${X3},${dy + DH / 2} V${sy - BH / 2 - 2}`} m="a-ora" />
-      <text x={X3 - 25} y={dy + DH / 2 + 20} fontSize={12} fill={C.orange}>
+      {/* Recall cue/rule? -> Recall succeeds (yes) from bottom vertex */}
+      <Arr x1={X3} y1={dy + DH / 2} x2={REC_X} y2={sy - BH / 2 - 2} m="a-ora" />
+      <text x={X3 - 24} y={dy + DH / 2 + 20} fontSize={12} fill={C.orange}>
         yes
       </text>
 
-      <OrthogonalArr x1={X3 + 10} y1={dy + DH / 2} x2={NOREC_X} y2={sy - BH / 2 - 2} yMid={dy + DH / 2 + 20} m="a-gray" />
-      <text x={(X3 + NOREC_X) / 2} y={dy + DH / 2 + 15} textAnchor="middle" fontSize={12} fill={C.gray}>
+      {/* Recall cue/rule? -> No recall (no) from right vertex */}
+      <PathArr d={`M${X3 + DW / 2},${dy} H${NOREC_X} V${sy - BH / 2 - 2}`} m="a-gray" />
+      <text x={(X3 + DW / 2 + NOREC_X) / 2} y={dy - 8} textAnchor="middle" fontSize={12} fill={C.gray}>
         no
       </text>
 
@@ -248,7 +303,7 @@ function ModelLogic({ yOff = 0 }) {
   );
 }
 
-// ── Panel A ──
+// ── Panel ──
 function PanelA() {
   return (
     <g>
@@ -269,7 +324,7 @@ function PanelA() {
       <Arr x1={X2 + BW / 2 + 2} y1={TL_Y} x2={X3 - BW / 2 - 2} y2={TL_Y} m="a-dark" />
       <Arr x1={X3 + BW / 2 + 2} y1={TL_Y} x2={X4 - BW / 2 - 2} y2={TL_Y} m="a-dark" />
 
-      {/* Straight vertical arrows */}
+      {/* Timeline -> decision arrows into top vertices of diamonds */}
       <Arr x1={X1} y1={TL_Y + BH / 2} x2={X1} y2={D_Y - DH / 2 - 2} m="a-blue" />
       <Arr x1={X3} y1={TL_Y + BH / 2} x2={X3} y2={D_Y - DH / 2 - 2} m="a-ora" />
 
@@ -279,51 +334,14 @@ function PanelA() {
   );
 }
 
-// ── Panel B ──
-function PanelB() {
-  const MY = 20;
-  
-  // Re-ordered strategically to eliminate overlapping lines
-  const MX1 = 160; // Trial stats (affects only Intention)
-  const MX2 = 400; // No-go (affects only Intention)
-  const MX3 = 640; // Reward (affects both)
-  const MX4 = 880; // Cognitive load (affects both)
-
-  const setRailY = D_Y - DH / 2 - 22;
-const setRailX1 = X1 - 42;
-const setRailX2 = X1 + 42;
-
-const recRailY = D_Y - DH / 2 - 22;
-const recRailX1 = X3 - 28;
-const recRailX2 = X3 + 28;
-
-  return (
-    <g>
-      {/* Modulator band */}
-      <rect x={50} y={MY - 35} width={950} height={60} rx={5} fill={C.modBg} stroke={C.modB} strokeWidth={0.6} opacity={0.6} />
-      <text x={65} y={MY - 22} fontSize={12} fill={C.muted} opacity={0.8}>
-        MODULATORS
-      </text>
-
-      {/* Modulator boxes */}
-      <Box cx={MX1} cy={MY} w={180} h={BH} fill={C.modBg} stroke={C.modB} label="Trial statistics / AX-AY" labelColor={C.muted} fs={12} />
-      <Box cx={MX2} cy={MY} w={150} h={BH} fill={C.modBg} stroke={C.modB} label="No-go manipulation" labelColor={C.muted} sub="(optional)" fs={12} />
-      <Box cx={MX3} cy={MY} w={140} h={BH} fill={C.modBg} stroke={C.modB} label="Reward / incentive" labelColor={C.muted} fs={12} />
-      <Box cx={MX4} cy={MY} w={130} h={BH} fill={C.modBg} stroke={C.modB} label="Cognitive load" labelColor={C.muted} fs={12} />
-
-    </g>
-  );
-}
-
-
 // ── Legend ──
 function Legend() {
   const lx = 1005;
   const ly = 74;
 
-  const swatch = (y, fill, stroke, label) => (
+  const swatch = (y, fill, stroke, label, dashed = false) => (
     <g key={label}>
-      <rect x={lx} y={y} width={14} height={10} rx={3} fill={fill} stroke={stroke} strokeWidth={1} />
+      <rect x={lx} y={y} width={14} height={10} rx={3} fill={fill} stroke={stroke} strokeWidth={1} strokeDasharray={dashed ? "5,3" : "none"} />
       <text x={lx + 20} y={y + 8} fontSize={12} fill={C.text}>
         {label}
       </text>
@@ -338,12 +356,7 @@ function Legend() {
       {swatch(ly + 8, C.blueBg, C.blue, "Proactive")}
       {swatch(ly + 28, C.orangeBg, C.orange, "Reactive")}
       {swatch(ly + 48, C.grayBg, C.grayB, "Default")}
-      <g>
-        <line x1={lx} y1={ly + 70} x2={lx + 14} y2={ly + 70} stroke={C.modB} strokeWidth={1.2} />
-        <text x={lx + 20} y={ly + 74} fontSize={12} fill={C.text}>
-          Modulator
-        </text>
-      </g>
+      {swatch(ly + 68, "white", C.grayB, "State nodes", true)}
     </g>
   );
 }
