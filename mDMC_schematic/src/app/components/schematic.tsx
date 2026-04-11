@@ -163,11 +163,11 @@ function Col({ width, children }: { width: number; children: React.ReactNode }) 
 /* ─── Legend ─── */
 function Legend() {
   const items = [
-    { border: C.green.border, bg: C.green.bg, label: "Model parameter (free / fit)" },
+    { border: C.green.border, bg: C.green.bg, label: "Model parameter (free or fitted)" },
     { border: C.grey.border, bg: C.grey.bg, label: "Task-defined input" },
     // This swatch corresponds to your grey background group for constants/assumptions:
-    { border: "#000000", bg: "#c4c4c4", label: "Model constant / assumption" },
-    { border: C.red.border, bg: C.red.bg, label: "Deterministic transform / computed" },
+    { border: "#000000", bg: "#c4c4c4", label: "Constant / assumption" },
+    { border: C.red.border, bg: C.red.bg, label: "Deterministic transform" },
   ];
 
   return (
@@ -434,7 +434,7 @@ export function Schematic() {
                   ]}
                   whiteItems={[
                     <Box key="wI" color="white">State of active intention: <Tex math="I = 1" /></Box>,
-                    <Box key="wc0" color="white">Baseline enforce: <Tex math="c_{0}" /></Box>,
+                    <Box key="wc0" color="white"><Tex math="\text{Baseline P(enforce intention)}= c_0" /></Box>,
                   ]}
                   greenItems={[
                     <Box key="e" color="green"><Tex math="\text{Load-interference strength } \lambda" /></Box>,

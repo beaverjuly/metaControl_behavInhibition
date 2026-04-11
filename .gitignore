@@ -1,0 +1,64 @@
+# -----------------
+# OS files
+# -----------------
+.DS_Store
+
+# -----------------
+# Python
+# -----------------
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+.python-version
+
+# Virtual environments
+.venv/
+venv/
+env/
+
+# Packaging / build
+build/
+dist/
+data/
+*.egg-info/
+
+# -----------------
+# Jupyter
+# -----------------
+.ipynb_checkpoints/
+
+# -----------------
+# VS Code
+# -----------------
+.vscode/
+
+# -----------------
+# Logs / temp
+# -----------------
+*.log
+tmp/
+temp/
+
+# -----------------
+# Data / outputs
+# -----------------
+# Uncomment if you do NOT want raw data tracked
+# data/*.sav
+
+# Common analysis outputs
+*.csv
+*.xlsx
+*.parquet
+*.feather
+*.pkl
+
+# Figures
+*.png
+*.jpg
+*.jpeg
+*.pdf
+*.svg
+
+# mac / misc
+*.swp
